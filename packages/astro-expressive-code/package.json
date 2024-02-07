@@ -13,7 +13,6 @@
     "directory": "packages/astro-expressive-code"
   },
   "type": "module",
-  "module": "./dist/index.js",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -23,7 +22,6 @@
     "./routes/scripts.ts": "./routes/scripts.ts",
     "./routes/styles.ts": "./routes/styles.ts"
   },
-  "types": "./dist/index.d.ts",
   "files": [
     "dist",
     "components",
@@ -31,7 +29,7 @@
     "virtual.d.ts"
   ],
   "scripts": {
-    "build": "tsup ./src/index.ts --format esm --dts --sourcemap --clean",
+    "build": "tsup ./src/index.ts --format esm --dts --sourcemap --no-minify --clean",
     "coverage": "vitest run --coverage",
     "test": "vitest run --reporter verbose",
     "test-short": "vitest run --reporter basic",
@@ -42,7 +40,7 @@
     "astro": "^3.3.0 || ^4.0.0-beta"
   },
   "dependencies": {
-    "@inox-tools/inline-mod": "file://../../../inox-tools/packages/inline-mod",
+    "@inox-tools/inline-mod": "1.1.0-smart-factory.2",
     "hast-util-to-html": "^8.0.4",
     "remark-expressive-code": "workspace:^0.32.4"
   },

@@ -2,8 +2,9 @@ import { fileURLToPath } from 'node:url'
 import type { ViteUserConfig } from 'astro'
 import { stableStringify } from 'remark-expressive-code'
 import { findEcConfigFilePath } from './ec-config'
-import { PartialAstroConfig, serializePartialAstroConfig } from './astro-config'
+import { PartialAstroConfig, extractPartialAstroConfig } from './astro-config'
 import { AstroExpressiveCodeOptions } from './ec-config'
+import inlineMod, { defineModule } from '@inox-tools/inline-mod/vite';
 
 /**
  * This Vite plugin provides access to page-wide styles & scripts that the Astro integration
@@ -25,48 +26,20 @@ export function vitePluginAstroExpressiveCode({
 	ecIntegrationOptions: AstroExpressiveCodeOptions
 	astroConfig: PartialAstroConfig
 }): NonNullable<ViteUserConfig['plugins']>[number] {
-	// Map virtual module names to their code contents as strings
-	const modules: Record<string, string> = {
-		'virtual:astro-expressive-code/scripts': `export const scripts = ${JSON.stringify(scripts)}`,
-		'virtual:astro-expressive-code/styles': `export const styles = ${JSON.stringify(styles)}`,
-	}
+	defineModule('virtual:astro-expressive-code/scripts', {
+		constExports: { scripts },
+	});
 
-	// Create virtual config module
-	const configModuleContents: string[] = []
-	// - Partial Astro config
-	configModuleContents.push(`export const astroConfig = ${serializePartialAstroConfig(astroConfig)}`)
-	// - Expressive Code integration options
-	const { customConfigPreprocessors, ...otherEcIntegrationOptions } = ecIntegrationOptions
-	configModuleContents.push(`export const ecIntegrationOptions = ${stableStringify(otherEcIntegrationOptions)}`)
-	// - Expressive Code config file options
-	const ecConfigFilePath = findEcConfigFilePath(astroConfig.root)
-	if (ecConfigFilePath) {
-		const strEcConfigFilePath = JSON.stringify(ecConfigFilePath)
-		configModuleContents.push(
-			`let ecConfigFileOptions = {}`,
-			`try {`,
-			`	ecConfigFileOptions = (await import(${strEcConfigFilePath})).default`,
-			`} catch (e) {`,
-			`	console.error('*** Failed to load Expressive Code config file ${strEcConfigFilePath}. You can ignore this message if you just renamed/removed the file.\\n\\n(Full error message: "' + (e?.message || e) + '")\\n')`,
-			`}`,
-			`export { ecConfigFileOptions }`
-		)
-	} else {
-		configModuleContents.push(`export const ecConfigFileOptions = {}`)
-	}
-	modules['virtual:astro-expressive-code/config'] = configModuleContents.join('\n')
+	defineModule('virtual:astro-expressive-code/styles', {
+		constExports: { styles },
+	});
 
-	// Create virtual config preprocessor module
-	modules['virtual:astro-expressive-code/preprocess-config'] = customConfigPreprocessors?.preprocessComponentConfig || `export default ({ ecConfig }) => ecConfig`
+	defineModule('virtual:astro-expressive-code/config', {
+		constExports: {
+			astroConfig: extractPartialAstroConfig(astroConfig),
+			ecIntegrationOptions,
+		}
+	})
 
-	return {
-		name: 'vite-plugin-astro-expressive-code',
-		resolveId: (id) => {
-			// Resolve virtual API module to the current package entrypoint
-			if (id === 'virtual:astro-expressive-code/api') return fileURLToPath(import.meta.url)
-			// Resolve other virtual modules
-			return id in modules ? `\0${id}` : undefined
-		},
-		load: (id) => (id?.[0] === '\0' ? modules[id.slice(1)] : undefined),
-	}
+	return inlineMod();
 }

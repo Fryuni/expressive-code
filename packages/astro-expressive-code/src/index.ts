@@ -5,6 +5,7 @@ import { ConfigSetupHookArgs, PartialAstroConfig } from './astro-config'
 import { AstroExpressiveCodeOptions, CustomConfigPreprocessors, ConfigPreprocessorFn, getSupportedEcConfigFilePaths, loadEcConfigFile } from './ec-config'
 import { createAstroRenderer } from './renderer'
 import { vitePluginAstroExpressiveCode } from './vite-plugin'
+import inlineMod, { asyncFactory } from '@inox-tools/inline-mod/vite';
 
 export * from 'remark-expressive-code'
 
@@ -35,9 +36,10 @@ export function astroExpressiveCode(integrationOptions: AstroExpressiveCodeOptio
 				// Watch all supported config file names for changes
 				getSupportedEcConfigFilePaths(astroConfig.root).forEach((filePath) => addWatchFile(filePath))
 
+				const configRoot = astroConfig.root;
+
 				// Merge the given options with the ones from a potential EC config file
-				const ecConfigFileOptions = await loadEcConfigFile(astroConfig.root)
-				const mergedOptions: AstroExpressiveCodeOptions = { ...ecConfigFileOptions, ...integrationOptions }
+				const ecConfigFileOptions = await loadEcConfigFile(configRoot);
 
 				// Warn if the user is both using an EC config file and passing options directly
 				const forwardedIntegrationOptions = { ...integrationOptions }
@@ -52,15 +54,22 @@ export function astroExpressiveCode(integrationOptions: AstroExpressiveCodeOptio
 					)
 				}
 
-				// Preprocess the merged config if custom preprocessors were provided
-				const processedEcConfig = (await mergedOptions.customConfigPreprocessors?.preprocessAstroIntegrationConfig({ ecConfig: mergedOptions, astroConfig })) || mergedOptions
+				const ecConfig = await asyncFactory<AstroExpressiveCodeOptions>(async () => {
+					const mergedOptions = { ...ecConfigFileOptions, ...integrationOptions }
+
+					// Preprocess the merged config if custom preprocessors were provided
+					const processedEcConfig = (await mergedOptions.customConfigPreprocessors?.preprocessAstroIntegrationConfig({ ecConfig: mergedOptions, astroConfig })) || mergedOptions
+
+					delete processedEcConfig.customConfigPreprocessors
+
+					return processedEcConfig;
+				});
 
 				// Prepare config to pass to the remark integration
-				const { customCreateAstroRenderer } = processedEcConfig
-				delete processedEcConfig.customCreateAstroRenderer
-				delete processedEcConfig.customConfigPreprocessors
+				const { customCreateAstroRenderer } = ecConfig
+				delete ecConfig.customCreateAstroRenderer
 
-				const { hashedStyles, hashedScripts, ...renderer } = await (customCreateAstroRenderer ?? createAstroRenderer)({ astroConfig, ecConfig: processedEcConfig, logger })
+				const { hashedStyles, hashedScripts, ...renderer } = await (customCreateAstroRenderer ?? createAstroRenderer)({ astroConfig, ecConfig, logger })
 
 				// Inject route handlers that provide access to the extracted styles & scripts
 				hashedStyles.forEach(([hashedRoute]) => {
@@ -86,7 +95,7 @@ export function astroExpressiveCode(integrationOptions: AstroExpressiveCodeOptio
 					// Even though we have created a custom renderer, some options are used
 					// by the remark integration itself (e.g. `tabWidth`, `getBlockLocale`),
 					// so we pass all of them through just to be safe
-					...processedEcConfig,
+					...ecConfig,
 					// Pass our custom renderer to the remark integration
 					customCreateRenderer: () => renderer,
 				}
@@ -98,7 +107,7 @@ export function astroExpressiveCode(integrationOptions: AstroExpressiveCodeOptio
 							vitePluginAstroExpressiveCode({
 								styles: hashedStyles,
 								scripts: hashedScripts,
-								ecIntegrationOptions: integrationOptions,
+								ecIntegrationOptions: ecConfig,
 								astroConfig,
 							}),
 						],

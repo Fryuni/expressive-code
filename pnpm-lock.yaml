@@ -316,8 +316,8 @@ importers:
   packages/astro-expressive-code:
     dependencies:
       '@inox-tools/inline-mod':
-        specifier: file://../../../inox-tools/packages/inline-mod
-        version: file:../inox-tools/packages/inline-mod(vite@4.5.0)
+        specifier: 1.1.0-smart-factory.2
+        version: 1.1.0-smart-factory.2(vite@4.5.0)
       astro:
         specifier: ^3.3.0 || ^4.0.0-beta
         version: 3.5.0(typescript@5.2.2)
@@ -1687,6 +1687,21 @@ packages:
   /@humanwhocodes/object-schema@2.0.1:
     resolution: {integrity: sha512-dvuCeX5fC9dXgJn9t+X5atfmgQAzUOWqS1254Gh0m6i8wKd10ebXkfNKiRK+1GWi/yTvvLDHpoxLr0xxxeslWw==}
     dev: true
+
+  /@inox-tools/inline-mod@1.1.0-smart-factory.2(vite@4.5.0):
+    resolution: {integrity: sha512-EsKx5/U1O/Z3XzersU+GfwmsOsif/qNMUsB6BQ5cCDLHHICm0NruPAaWg31FNrWCJi4qla7VJVdaZxPM+AkrfA==}
+    peerDependencies:
+      vite: ^4 || ^5
+    peerDependenciesMeta:
+      vite:
+        optional: true
+    dependencies:
+      debug: 4.3.4
+      typescript: 5.2.2
+      vite: 4.5.0(@types/node@18.15.11)
+    transitivePeerDependencies:
+      - supports-color
+    dev: false
 
   /@isaacs/cliui@8.0.2:
     resolution: {integrity: sha512-O8jcjabXaleOG9DQ0+ARXWZBTfnP4WNAqzuiJK7ll44AmxGKv/J2M4TPjxjY3znBCfvBXFzucm1twdyFybFqEA==}
@@ -9462,20 +9477,3 @@ packages:
 
   /zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
-
-  file:../inox-tools/packages/inline-mod(vite@4.5.0):
-    resolution: {directory: ../inox-tools/packages/inline-mod, type: directory}
-    id: file:../inox-tools/packages/inline-mod
-    name: '@inox-tools/inline-mod'
-    peerDependencies:
-      vite: ^4 || ^5
-    peerDependenciesMeta:
-      vite:
-        optional: true
-    dependencies:
-      debug: 4.3.4
-      typescript: 5.2.2
-      vite: 4.5.0(@types/node@18.15.11)
-    transitivePeerDependencies:
-      - supports-color
-    dev: false

@@ -11,23 +11,23 @@ export type ConfigSetupHookArgs = Parameters<NonNullable<AstroIntegration['hooks
 export type PartialAstroConfig = {
 	base: string
 	build?:
-		| Partial<{
-				assets: string
-				assetsPrefix: string | undefined
-		  }>
-		| undefined
+	| Partial<{
+		assets: string
+		assetsPrefix: string | undefined
+	}>
+	| undefined
 	markdown?:
-		| Partial<{
-				shikiConfig: Partial<{
-					langs: ConfigSetupHookArgs['config']['markdown']['shikiConfig']['langs']
-				}>
-		  }>
-		| undefined
+	| Partial<{
+		shikiConfig: Partial<{
+			langs: ConfigSetupHookArgs['config']['markdown']['shikiConfig']['langs']
+		}>
+	}>
+	| undefined
 	root: URL
 	srcDir: URL
 }
 
-export function serializePartialAstroConfig(config: PartialAstroConfig): string {
+export function extractPartialAstroConfig(config: PartialAstroConfig): PartialAstroConfig {
 	const partialConfig: PartialAstroConfig = {
 		base: config.base,
 		root: config.root,
@@ -41,5 +41,5 @@ export function serializePartialAstroConfig(config: PartialAstroConfig): string 
 	if (config.markdown?.shikiConfig?.langs) {
 		partialConfig.markdown = { shikiConfig: { langs: config.markdown.shikiConfig.langs } }
 	}
-	return JSON.stringify(partialConfig)
+	return partialConfig;
 }
