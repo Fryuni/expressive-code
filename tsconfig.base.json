@@ -11,8 +11,8 @@
     "skipLibCheck": true,
     "strict": true,
     "moduleResolution": "bundler",
-    "module": "ESNext",
-    "target": "ESNext",
+    "module": "ES2022",
+    "target": "ES2022",
     "paths": {
       "@expressive-code/core": ["./packages/@expressive-code/core/src"],
       "@expressive-code/plugin-frames": ["./packages/@expressive-code/plugin-frames/src"],

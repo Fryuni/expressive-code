@@ -3,9 +3,10 @@ import type { RemarkExpressiveCodeOptions } from 'remark-expressive-code'
 import remarkExpressiveCode from 'remark-expressive-code'
 import { ConfigSetupHookArgs, PartialAstroConfig } from './astro-config'
 import { AstroExpressiveCodeOptions, CustomConfigPreprocessors, ConfigPreprocessorFn, getSupportedEcConfigFilePaths, loadEcConfigFile } from './ec-config'
+import { fileURLToPath } from 'node:url';
 import { createAstroRenderer } from './renderer'
 import { vitePluginAstroExpressiveCode } from './vite-plugin'
-import inlineMod, { asyncFactory } from '@inox-tools/inline-mod/vite';
+import { asyncFactory } from '@inox-tools/inline-mod/vite';
 
 export * from 'remark-expressive-code'
 
@@ -39,7 +40,9 @@ export function astroExpressiveCode(integrationOptions: AstroExpressiveCodeOptio
 				const configRoot = astroConfig.root;
 
 				// Merge the given options with the ones from a potential EC config file
-				const ecConfigFileOptions = await loadEcConfigFile(configRoot);
+				const ecConfigFileOptions = await asyncFactory(async () => {
+					return loadEcConfigFile(configRoot);
+				});
 
 				// Warn if the user is both using an EC config file and passing options directly
 				const forwardedIntegrationOptions = { ...integrationOptions }
@@ -54,15 +57,20 @@ export function astroExpressiveCode(integrationOptions: AstroExpressiveCodeOptio
 					)
 				}
 
+				delete integrationOptions.customCreateAstroRenderer;
+				delete integrationOptions.customCreateRenderer;
+				delete integrationOptions.customConfigPreprocessors;
+
 				const ecConfig = await asyncFactory<AstroExpressiveCodeOptions>(async () => {
-					const mergedOptions = { ...ecConfigFileOptions, ...integrationOptions }
+					const mergedOptions = { ...integrationOptions }
 
 					// Preprocess the merged config if custom preprocessors were provided
-					const processedEcConfig = (await mergedOptions.customConfigPreprocessors?.preprocessAstroIntegrationConfig({ ecConfig: mergedOptions, astroConfig })) || mergedOptions
+					// const processedEcConfig = (await mergedOptions.customConfigPreprocessors?.preprocessAstroIntegrationConfig({ ecConfig: mergedOptions, astroConfig })) || mergedOptions
+					//
+					// delete processedEcConfig.customConfigPreprocessors
 
-					delete processedEcConfig.customConfigPreprocessors
-
-					return processedEcConfig;
+					// return processedEcConfig;
+					return mergedOptions;
 				});
 
 				// Prepare config to pass to the remark integration

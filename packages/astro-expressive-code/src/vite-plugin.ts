@@ -34,6 +34,8 @@ export function vitePluginAstroExpressiveCode({
 		constExports: { styles },
 	});
 
+	console.log('Keys:', ecIntegrationOptions);
+
 	defineModule('virtual:astro-expressive-code/config', {
 		constExports: {
 			astroConfig: extractPartialAstroConfig(astroConfig),
@@ -41,5 +43,11 @@ export function vitePluginAstroExpressiveCode({
 		}
 	})
 
-	return inlineMod();
+	return [inlineMod(), {
+		name: 'vite-plugin-astro-expressive-code',
+		resolveId: (id) => {
+			// Resolve virtual API module to the current package entrypoint
+			if (id === 'virtual:astro-expressive-code/api') return fileURLToPath(import.meta.url)
+		},
+	}];
 }
