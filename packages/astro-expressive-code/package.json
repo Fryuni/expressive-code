@@ -42,6 +42,7 @@
     "astro": "^3.3.0 || ^4.0.0-beta"
   },
   "dependencies": {
+    "@inox-tools/inline-mod": "file://../../../inox-tools/packages/inline-mod",
     "hast-util-to-html": "^8.0.4",
     "remark-expressive-code": "workspace:^0.32.4"
   },

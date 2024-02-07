@@ -315,6 +315,9 @@ importers:
 
   packages/astro-expressive-code:
     dependencies:
+      '@inox-tools/inline-mod':
+        specifier: file://../../../inox-tools/packages/inline-mod
+        version: file:../inox-tools/packages/inline-mod(vite@4.5.0)
       astro:
         specifier: ^3.3.0 || ^4.0.0-beta
         version: 3.5.0(typescript@5.2.2)
@@ -9459,3 +9462,20 @@ packages:
 
   /zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
+
+  file:../inox-tools/packages/inline-mod(vite@4.5.0):
+    resolution: {directory: ../inox-tools/packages/inline-mod, type: directory}
+    id: file:../inox-tools/packages/inline-mod
+    name: '@inox-tools/inline-mod'
+    peerDependencies:
+      vite: ^4 || ^5
+    peerDependenciesMeta:
+      vite:
+        optional: true
+    dependencies:
+      debug: 4.3.4
+      typescript: 5.2.2
+      vite: 4.5.0(@types/node@18.15.11)
+    transitivePeerDependencies:
+      - supports-color
+    dev: false
